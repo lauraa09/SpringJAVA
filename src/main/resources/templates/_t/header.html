@@ -1,0 +1,19 @@
+<header class="container">
+	<div class="row">
+	
+		<div class="col-4" th:if="${session.persona == null}">
+			<a href="/registro">Registro</a>
+			&nbsp;/&nbsp;
+			<a href="/login">Login</a>
+		</div>
+	
+		<div class="col-4" th:if="${session.persona != null}">
+			<span th:text="${session.persona.nombre}"></span>
+			&nbsp;/&nbsp;
+			( <a href="/logout">Logout</a> )
+		</div>
+
+		<img src="/img/logopap.png" class="rounded mx-auto d-block"
+			height="50" width="50" />
+	</div>
+</header>
