@@ -1,5 +1,6 @@
 package org.agaray.pap.controller;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,21 +34,19 @@ public class PersonaController {
 	@Autowired
 	private AficionRepository repoAficion;
 
-	
 	@PostMapping("d")
 	public String borrarPost(@RequestParam("id") Long idPersona, HttpSession s) {
 		String nombrePersona = "----";
 		try {
-			Persona persona=repoPersona.getOne(idPersona);
-			nombrePersona= persona.getNombre();
+			Persona persona = repoPersona.getOne(idPersona);
+			nombrePersona = persona.getNombre();
 			repoPersona.delete(persona);
 			H.info(s, "Persona " + nombrePersona + " borrada correctamente", "info", "/persona/r");
 		} catch (Exception e) {
-			H.info(s, "Error al borrar la persona " + nombrePersona , "danger", "/persona/c");
+			H.info(s, "Error al borrar la persona " + nombrePersona, "danger", "/persona/c");
 		}
 		return "redirect:/info";
 	}
-	
 
 	@GetMapping("c")
 	public String crearGet(ModelMap m) {
@@ -60,63 +59,64 @@ public class PersonaController {
 	@PostMapping("c")
 	public String crearPost(
 			@RequestParam("nombre") String nombrePersona,
-			@RequestParam("loginname") String loginnamePersona,
+			@RequestParam("loginname") String loginnamePersona, 
 			@RequestParam("password") String passwordPersona,
-			@RequestParam("idPais") Long idPais, 
-			@RequestParam(value="idAficionGusta[]", required = false) List<Long> idGustos,
-			@RequestParam(value="idAficionOdio[]", required = false) List<Long> idOdios,
-			HttpSession s) {
+			@RequestParam("altura") Integer altura,
+			@RequestParam("fnac") Date fnac,
+			@RequestParam(value = "idPais", required = false) Long idPais,
+			@RequestParam(value = "idAficionGusta[]", required = false) List<Long> idGustos,
+			@RequestParam(value = "idAficionOdio[]", required = false) List<Long> idOdios, HttpSession s) {
 		try {
-			idGustos = (idGustos==null?new ArrayList<Long>():idGustos);
-			idOdios= (idOdios==null?new ArrayList<Long>():idOdios);
-			
-			Persona persona = new Persona(nombrePersona,loginnamePersona,passwordPersona);
-			Pais paisNacimiento = repoPais.getOne(idPais);
-			
-			paisNacimiento.getNacidos().add(persona);
-			persona.setNace(paisNacimiento);
-			
-			for (Long id:idGustos) {
+			idGustos = (idGustos == null ? new ArrayList<Long>() : idGustos);
+			idOdios = (idOdios == null ? new ArrayList<Long>() : idOdios);
+
+			Persona persona = new Persona(nombrePersona, loginnamePersona, passwordPersona, altura, fnac);
+			if (idPais != null) {
+				Pais paisNacimiento = repoPais.getOne(idPais);
+
+				paisNacimiento.getNacidos().add(persona);
+				persona.setNace(paisNacimiento);
+			}
+			for (Long id : idGustos) {
 				Aficion aficion = repoAficion.getOne(id);
 				aficion.getGustosas().add(persona);
 				persona.getGustos().add(aficion);
 			}
 
-			for (Long id:idOdios) {
+			for (Long id : idOdios) {
 				Aficion aficion = repoAficion.getOne(id);
 				aficion.getOdiosas().add(persona);
 				persona.getOdios().add(aficion);
 			}
-			
+
 			repoPersona.save(persona);
 
-			H.info(s, "Persona "+nombrePersona+" creada correctamente", "info", "/persona/r");
+			H.info(s, "Persona " + nombrePersona + " creada correctamente", "info", "/persona/r");
 		} catch (Exception e) {
-			H.info(s, "Error al crear "+nombrePersona, "danger", "/persona/r");
+			H.info(s, "Error al crear " + nombrePersona, "danger", "/persona/r");
 		}
 		return "redirect:/info";
 	}
-	
 
 	@GetMapping("r")
-	public String read(
-			ModelMap m,
-			@RequestParam(value = "f", required = false) String f
-			) {
-		f = (f==null)?"":f;
-		m.put("f",f);
-		List<Persona> personas = repoPersona.findDistinctByNombreIgnoreCaseContainingOrLoginnameIgnoreCaseContainingOrNaceNombreIgnoreCaseContainingOrGustosNombreIgnoreCaseContainingOrOdiosNombreIgnoreCaseContainingOrderByNaceNombreDesc(f, f, f, f, f);
+	public String read(ModelMap m, @RequestParam(value = "f", required = false) String f) {
+		f = (f == null) ? "" : f;
+		m.put("f", f);
+		/*
+		List<Persona> personas = repoPersona
+				.findDistinctByNombreIgnoreCaseContainingOrLoginnameIgnoreCaseContainingOrNaceNombreIgnoreCaseContainingOrGustosNombreIgnoreCaseContainingOrOdiosNombreIgnoreCaseContainingOrderByNaceNombreDesc(
+						f, f, f, f, f);
+		*/
+		//List<Persona> personas = repoPersona.findAllByOrderByAlturaAsc();
+		List<Persona> personas = repoPersona.findAllByOrderByAlturaDesc();
 		m.put("personas", personas);
-		
-		m.put("view","/persona/personaR");
+
+		m.put("view", "/persona/personaR");
 		return "/_t/frame";
 	}
-	
+
 	@GetMapping("u")
-	public String updateGet(
-			ModelMap m, 
-			@RequestParam("id")Long id
-			) {
+	public String updateGet(ModelMap m, @RequestParam("id") Long id) {
 		m.put("persona", repoPersona.getOne(id));
 		m.put("paises", repoPais.findAll());
 		m.put("aficiones", repoAficion.findAll());
@@ -125,72 +125,66 @@ public class PersonaController {
 	}
 
 	@PostMapping("u")
-	public String updatePost(
-			@RequestParam("id") Long idPersona, 
-			@RequestParam("nombre") String nombrePersona, 
-			@RequestParam("idPais") Long idPais, 
-			@RequestParam(value="idAficionGusta[]", required = false) List<Long> idGustos,
-			@RequestParam(value="idAficionOdio[]", required = false) List<Long> idOdios,
-			HttpSession s) {
-		
-		String vista="redirect:/persona/r";
+	public String updatePost(@RequestParam("id") Long idPersona, @RequestParam("nombre") String nombrePersona,
+			@RequestParam("idPais") Long idPais,
+			@RequestParam(value = "idAficionGusta[]", required = false) List<Long> idGustos,
+			@RequestParam(value = "idAficionOdio[]", required = false) List<Long> idOdios, HttpSession s) {
+
+		String vista = "redirect:/persona/r";
 
 		try {
-			
+
 			Persona persona = repoPersona.getOne(idPersona);
-			
-			
+
 			// ====================
 			// ATRIBUTOS "NORMALES"
 			persona.setNombre(nombrePersona);
 			// ====================
-			
+
 			// ====================
 			// PAIS NACIMIENTO
 			Pais paisNacimiento = repoPais.getOne(idPais);
 			Pais paisNacimientoAnt = persona.getNace();
 			// ====================
-			
+
 			paisNacimientoAnt.getNacidos().remove(persona);
 			persona.setNace(null);
-			
+
 			paisNacimiento.getNacidos().add(persona);
 			persona.setNace(paisNacimiento);
-			
+
 			// ====================
 			// GUSTOS y ODIOS
-			
-			idGustos = (idGustos==null?new ArrayList<Long>():idGustos);
-			idOdios= (idOdios==null?new ArrayList<Long>():idOdios);
 
-			
+			idGustos = (idGustos == null ? new ArrayList<Long>() : idGustos);
+			idOdios = (idOdios == null ? new ArrayList<Long>() : idOdios);
+
 			// Creo nueva colección de gustos nuevos y la sustituyo por la antigua
 			List<Aficion> gustosNuevos = new ArrayList<Aficion>();
-			for (Long id:idGustos) {
+			for (Long id : idGustos) {
 				Aficion aficion = repoAficion.getOne(id);
 				aficion.getGustosas().add(persona);
 				gustosNuevos.add(aficion);
 			}
 			persona.setGustos(gustosNuevos);
-			
+
 			// Creo nueva colección de odios nuevos y la sustituyo por la antigua
 			List<Aficion> odiosNuevos = new ArrayList<Aficion>();
-			for (Long id:idOdios) {
+			for (Long id : idOdios) {
 				Aficion aficion = repoAficion.getOne(id);
 				aficion.getOdiosas().add(persona);
 				odiosNuevos.add(aficion);
 			}
 			persona.setOdios(odiosNuevos);
-			
+
 			repoPersona.save(persona);
 
-			H.info(s, "Persona "+nombrePersona+" actualizada correctamente", "info", "/persona/r");
+			H.info(s, "Persona " + nombrePersona + " actualizada correctamente", "info", "/persona/r");
 		} catch (Exception e) {
-			H.info(s, "Error al actualizar "+nombrePersona, "danger", "/persona/r");
-			vista="redirect:/info";
+			H.info(s, "Error al actualizar " + nombrePersona, "danger", "/persona/r");
+			vista = "redirect:/info";
 		}
 		return vista;
 	}
-
 
 }

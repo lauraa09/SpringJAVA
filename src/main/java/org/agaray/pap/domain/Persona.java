@@ -1,5 +1,6 @@
 package org.agaray.pap.domain;
 
+import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -27,6 +28,10 @@ public class Persona {
 	private String loginname;
 
 	private String password;
+	
+	private Integer altura;
+	
+	private Date fnac;
 
 	@ManyToOne
 	private Pais nace;
@@ -44,6 +49,27 @@ public class Persona {
 		this.gustos = new ArrayList<Aficion>();
 		this.odios = new ArrayList<Aficion>();
 	}
+
+	
+	public Date getFnac() {
+		return fnac;
+	}
+
+
+	public void setFnac(Date fnac) {
+		this.fnac = fnac;
+	}
+
+
+	public Integer getAltura() {
+		return altura;
+	}
+
+
+	public void setAltura(Integer altura) {
+		this.altura = altura;
+	}
+
 
 	public String getLoginname() {
 		return loginname;
@@ -66,9 +92,11 @@ public class Persona {
 		this.odios = new ArrayList<Aficion>();
 	}
 
-	public Persona(String nombrePersona, String loginnamePersona, String passwordPersona) {
+	public Persona(String nombrePersona, String loginnamePersona, String passwordPersona, Integer altura, Date fnac) {
 		this.nombre = nombrePersona;
 		this.loginname = loginnamePersona;
+		this.altura = altura;
+		this.fnac=fnac;
 		this.password = (new BCryptPasswordEncoder()).encode(passwordPersona);
 		this.gustos = new ArrayList<Aficion>();
 		this.odios = new ArrayList<Aficion>();

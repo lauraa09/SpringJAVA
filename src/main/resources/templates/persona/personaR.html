@@ -18,6 +18,8 @@
 		<tr>
 			<th>Nombre</th>
 			<th>Loginname</th>
+			<th>Altura</th>
+			<th>Fecha nacimiento</th>
 			<th>País nac.</th>
 			<th>Gustos</th>
 			<th>Odios</th>
@@ -28,6 +30,10 @@
 			<td th:utext="${#strings.replace(persona.nombre,f,'<kbd>'+f+'</kbd>')}"></td>
 
 			<td th:utext="${#strings.replace(persona.loginname,f,'<kbd>'+f+'</kbd>')}"></td>
+
+			<td th:utext="${#strings.replace(persona.altura,f,'<kbd>'+f+'</kbd>')}"></td>
+
+			<td th:utext="${#dates.formatISO(persona.fnac)}"></td>
 
 			<td th:utext="${#strings.replace(persona.nace?.nombre,f,'<kbd>'+f+'</kbd>')}"></td>
 

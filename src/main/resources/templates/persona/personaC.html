@@ -17,6 +17,14 @@
 		<input type="password" name="password">
 		<br/>
 
+		Altura (cm)
+		<input type="number" name="altura" min="1" max="400">
+		<br/>
+		
+		Fecha de nacimiento
+		<input type="date" name="fnac" >
+		<br/>
+
 		País de nacimiento
 		<select name="idPais">
 			<option th:each="pais:${paises}" th:text="${pais.nombre}" th:value="${pais.id}"></option>
